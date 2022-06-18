@@ -1,0 +1,5 @@
+.idea/
+*.bin
+!highlighter/highlighter.bin
+*.png
+!docs/found_gopher.png

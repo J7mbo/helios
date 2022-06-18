@@ -1,0 +1,53 @@
+package helios
+
+import (
+	"github.com/go-vgo/robotgo"
+	"math"
+	"math/rand"
+	"time"
+)
+
+type Clicker struct {
+}
+
+// @todo Every Image needs a Location which we can use instead.
+
+// Click clicks at a random X and Y coordinate within the given location.
+// This doesn't use the standard Click() function of any library which is easy
+// to detect as an automated click - rather it adds entropy throughout the mouse events.
+func (c *Clicker) Click(match *Match) {
+	bounds := match.img.img.Bounds()
+	point := bounds.Size()
+	w := point.X
+	h := point.Y
+
+	c.sleepRandomly(0.2, 0.5)
+	c.moveMouseRandomlyWithinBox(match.x, match.y, float64(w), float64(h))
+	c.sleepRandomly(0.2, 0.5)
+	c.performRandomisedClick()
+}
+
+func (c *Clicker) performRandomisedClick() {
+	robotgo.Toggle("left", "down")
+	c.sleepRandomly(0.2, 0.5)
+	robotgo.Toggle("left", "up")
+}
+
+func (c *Clicker) sleepRandomly(min, max float64) {
+	time.Sleep(time.Duration(c.generateRandomNumber(min, max) * float64(time.Second)))
+}
+
+func (c *Clicker) moveMouseRandomlyWithinBox(x, y, w, h float64) {
+	randomX := c.generateRandomNumber(x/2, x/2+w/2)
+	randomY := c.generateRandomNumber(y/2, y/2+h/2)
+
+	robotgo.Move(int(math.Round(randomX)), int(math.Round(randomY)))
+}
+
+func (c *Clicker) generateRandomNumber(min float64, max float64) float64 {
+	rand.Seed(time.Now().UnixNano())
+	randNum := (rand.Float64() * (max - min)) + min
+
+	// Trims to two decimal places. Doesn't need to be perfect.
+	return math.Floor(randNum*100) / 100
+}
