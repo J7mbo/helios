@@ -1,4 +1,4 @@
-package helios
+package main
 
 import (
 	"fmt"
@@ -71,7 +71,7 @@ func parseArgs() *args {
 	lineWidth := parser.Float("", "l", &argparse.Options{
 		Required: false,
 		Help:     "height of the box to be drawn",
-		Default:  5,
+		Default:  5.0,
 	})
 
 	err := parser.Parse(os.Args)

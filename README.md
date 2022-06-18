@@ -12,13 +12,18 @@ Example:
 ```go
 package main
 
-import "github.com/j7mbo/helios"
+import (
+	. "github.com/j7mbo/helios"
+	"time"
+)
 
 func main() {
+    // Initialise helios without any configuration
+    app := NewApplication(nil)
     // Load .gopher.png and expect to find it at 0.9 / 1.0 confidence
     gopherImage, _ := NewImage("./gopher.png", 0.9)
     // Find the gopher image on-screen
-    gopher := screen.Find(gopherImage)
+    gopher := app.GetScreen().Find(gopherImage)
     // Highlight it for two seconds
     gopher.Highlight(2 * time.Second)
     // Click at a random (X,Y) coordinate within the matched box
@@ -44,7 +49,7 @@ Upcoming work
 - [ ] Support and releases for Windows, Linux (MacOS already supported)
 - [ ] Wait X seconds for an image to appear
 - [ ] Support for multiple screens
-- [ ] #1
+- [ ] Fix for issue #1 - no need to embed a highlighter binary
 - [ ] Embedding OpenCV directly, 0 dependency binary (need help with this)
 - [ ] API for interfacing with other languages 
 - [ ] OCR, text extraction
