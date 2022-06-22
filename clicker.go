@@ -10,19 +10,12 @@ import (
 type Clicker struct {
 }
 
-// @todo Every Image needs a Location which we can use instead.
-
 // Click clicks at a random X and Y coordinate within the given location.
 // This doesn't use the standard Click() function of any library which is easy
 // to detect as an automated click - rather it adds entropy throughout the mouse events.
 func (c *Clicker) Click(match *Match) {
-	bounds := match.img.img.Bounds()
-	point := bounds.Size()
-	w := point.X
-	h := point.Y
-
 	c.sleepRandomly(0.2, 0.5)
-	c.moveMouseRandomlyWithinBox(match.x, match.y, float64(w), float64(h))
+	c.moveMouseRandomlyWithinBox(match.topLeft.x, match.topLeft.y, float64(match.width), float64(match.height))
 	c.sleepRandomly(0.2, 0.5)
 	c.performRandomisedClick()
 }

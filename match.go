@@ -5,22 +5,21 @@ import (
 )
 
 type Match struct {
+	Region
+
 	screen      *Screen
 	img         *Image
 	highlighter *Highlighter
 	clicker     *Clicker
 
-	x          float64
-	y          float64
 	confidence float32
 }
 
-func NewMatch(img *Image, x float64, y float64, confidence float32, screen *Screen, highlighter *Highlighter) *Match {
+func NewMatch(img *Image, confidence float32, screen *Screen, highlighter *Highlighter, region *Region) *Match {
 	return &Match{
 		screen:      screen,
 		img:         img,
-		x:           x,
-		y:           y,
+		Region:      *region,
 		highlighter: highlighter,
 		confidence:  confidence,
 	}
@@ -35,16 +34,13 @@ func (m *Match) Highlight(t time.Duration) {
 		return
 	}
 
-	bounds := m.img.img.Bounds()
-	point := bounds.Size()
-
 	m.highlighter.Highlight(&HighlightRequest{
 		ScreenWidth:  m.screen.width,
 		ScreenHeight: m.screen.height,
-		X:            m.x,
-		Y:            m.y,
-		Width:        float64(point.X),
-		Height:       float64(point.Y),
+		X:            m.topLeft.x,
+		Y:            m.topLeft.y,
+		Width:        float64(m.width),
+		Height:       float64(m.height),
 		Duration:     t.Seconds(),
 	})
 }

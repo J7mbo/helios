@@ -155,10 +155,7 @@ func (m transparentFyneTheme) Size(name fyne.ThemeSizeName) float32 {
 
 func drawRectangle(a *args) image.Image {
 	dc := gg.NewContext(a.ScreenWidth, a.ScreenHeight)
-	// Took me ages to guess at /2 here, but then it worked so :this_is_fine:...
-	// If you're reading this, and you know why, please let me know as it's painful
-	// to have fixed something but have no idea how you actually did it!!
-	dc.DrawRectangle(a.X/2, a.Y/2, a.Width/2, a.Height/2)
+	dc.DrawRectangle(a.X, a.Y, a.Width, a.Height)
 	dc.SetColor(a.Colour)
 	dc.SetLineWidth(a.LineWidth)
 	dc.Stroke()

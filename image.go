@@ -14,9 +14,11 @@ var ImageUnknownError = errors.New("unknown error")
 
 type Image struct {
 	img                 i.Image
-	x                   float64
-	y                   float64
 	confidenceThreshold float64
+}
+
+func (i *Image) GetImage() i.Image {
+	return i.img
 }
 
 func NewImage(path string, confidenceThreshold float64) (*Image, error) {
