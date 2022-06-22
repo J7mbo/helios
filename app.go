@@ -15,7 +15,7 @@ func NewApplication(config *Config) *App {
 		config, _ = NewConfig()
 	}
 
-	return &App{config: config, screen: NewScreen(NewHighlighter(highlighterBinary))}
+	return &App{config: config, screen: NewScreen(NewHighlighter(highlighterBinary), config.GetPollInterval())}
 }
 
 func (a *App) GetScreen() *Screen {

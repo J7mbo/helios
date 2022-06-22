@@ -57,10 +57,11 @@ Upcoming work
 - [x] Ability to define `Region`s to search
 - [x] Abstraction for `finder`
 - [x] Works with any resolution
-- [ ] Wait X seconds for an image to appear
+- [x] Wait X seconds for an image to appear
 - [ ] Offsets for regions 
 - [ ] Stable supported api
 - [ ] Support and releases for Windows, Linux (MacOS already supported)
+- [ ] Moving highlight box during highlighting
 - [ ] Support for multiple screens
 - [ ] Fix for issue #1 - no need to embed a highlighter binary
 - [ ] Embedding OpenCV directly, 0 dependency binary (need help with this)

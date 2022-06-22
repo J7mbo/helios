@@ -5,14 +5,16 @@ import (
 	"github.com/go-vgo/robotgo"
 	"gocv.io/x/gocv"
 	"image/png"
+	"time"
 )
 
 type Finder struct {
-	screen *Screen
+	screen       *Screen
+	pollInterval *PollInterval
 }
 
-func NewFinder(s *Screen) *Finder {
-	return &Finder{screen: s}
+func NewFinder(screen *Screen, pollInterval *PollInterval) *Finder {
+	return &Finder{screen: screen, pollInterval: pollInterval}
 }
 
 func (f *Finder) Find(i *Image, r *Region) *Match {
@@ -51,8 +53,6 @@ func (f *Finder) Find(i *Image, r *Region) *Match {
 	if maxConfidence < float32(i.confidenceThreshold) {
 		return nil
 	}
-
-	//rect(screenWidth, screenHeight, float64(maxLoc.X/2+r.X), float64((maxLoc.Y/2)+r.Y), float64(width/2), float64(height/2))
 
 	region := &Region{
 		topLeft: &Point{
@@ -131,6 +131,28 @@ func (f *Finder) FindAll(i *Image, r *Region) []*Match {
 	}
 
 	return matches
+}
+
+func (f *Finder) Wait(i *Image, r *Region, t time.Duration) *Match {
+	// Default to 0.25 seconds if config not provided for PollInterval.
+	pollInterval := f.pollInterval
+	if f.pollInterval == nil {
+		pollInterval = &PollInterval{100 * time.Millisecond}
+	}
+
+	for {
+		if time.Now().Unix() > time.Now().Add(t).Unix() {
+			break
+		}
+
+		if match := f.Find(i, r); match != nil {
+			return match
+		}
+
+		time.Sleep(pollInterval.Duration)
+	}
+
+	return nil
 }
 
 func inBetween(i, min, max float64) bool {

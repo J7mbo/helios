@@ -32,6 +32,16 @@ func NewConfig(configs ...configuration) (*Config, error) {
 	return &Config{configs: configs}, nil
 }
 
+func (c *Config) GetPollInterval() *PollInterval {
+	for _, config := range c.configs {
+		if pollInterval, isPollInterval := config.(*PollInterval); isPollInterval {
+			return pollInterval
+		}
+	}
+
+	return nil
+}
+
 type PollInterval struct {
 	time.Duration
 }

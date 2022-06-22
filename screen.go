@@ -10,9 +10,10 @@ type Screen struct {
 
 	highlighter *Highlighter
 	finder      *Finder
+	interval    *PollInterval
 }
 
-func NewScreen(highlighter *Highlighter) *Screen {
+func NewScreen(highlighter *Highlighter, interval *PollInterval) *Screen {
 	w, h := robotgo.GetScreenSize()
 
 	screen := &Screen{}
@@ -21,7 +22,7 @@ func NewScreen(highlighter *Highlighter) *Screen {
 	screen.Region.height = h
 	screen.highlighter = highlighter
 
-	finder := NewFinder(screen)
+	finder := NewFinder(screen, interval)
 	screen.finder = finder
 
 	return screen
@@ -49,4 +50,8 @@ func (s *Screen) Find(i *Image) *Match {
 
 func (s *Screen) FindAll(i *Image) []*Match {
 	return s.finder.FindAll(i, &s.Region)
+}
+
+func (s *Screen) Wait(i *Image, t time.Duration) *Match {
+	return s.finder.Wait(i, &s.Region, t)
 }

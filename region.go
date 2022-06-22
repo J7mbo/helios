@@ -63,3 +63,7 @@ func (r *Region) Find(i *Image) *Match {
 func (r *Region) FindAll(i *Image) []*Match {
 	return r.screen.finder.FindAll(i, r)
 }
+
+func (r *Region) Wait(i *Image, t time.Duration) *Match {
+	return r.finder.Wait(i, r, t)
+}
