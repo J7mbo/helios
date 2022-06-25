@@ -31,8 +31,8 @@ func (c *Clicker) sleepRandomly(min, max float64) {
 }
 
 func (c *Clicker) moveMouseRandomlyWithinBox(x, y, w, h float64) {
-	randomX := c.generateRandomNumber(x/2, x/2+w/2)
-	randomY := c.generateRandomNumber(y/2, y/2+h/2)
+	randomX := c.generateRandomNumber(x, x+w)
+	randomY := c.generateRandomNumber(y, y+h)
 
 	robotgo.Move(int(math.Round(randomX)), int(math.Round(randomY)))
 }
