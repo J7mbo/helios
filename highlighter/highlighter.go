@@ -108,10 +108,12 @@ func main() {
 	a.Settings().SetTheme(&transparentFyneTheme{})
 	w := drv.CreateSplashWindow()
 
-	w.Resize(fyne.Size{Width: float32(args.ScreenWidth), Height: float32(args.ScreenHeight)})
+	// SetPosition requires using the enable-set-window-position branch from github.com/j7mbo/fyne.
+	w.SetPosition(fyne.Position{X: float32(args.X), Y: float32(args.Y)})
+	w.Resize(fyne.Size{Width: float32(args.Width), Height: float32(args.Height)})
 
 	img := canvas.NewImageFromImage(drawRectangle(args))
-	img.FillMode = canvas.ImageFillStretch
+	img.FillMode = canvas.ImageFillOriginal
 
 	w.SetContent(img)
 
@@ -121,6 +123,14 @@ func main() {
 		time.Sleep(time.Duration(args.Duration * float64(time.Second)))
 		w.Close()
 		a.Quit()
+	}()
+
+	// Keep the window focussed.
+	go func() {
+		for {
+			time.Sleep(50 * time.Millisecond)
+			w.RequestFocus()
+		}
 	}()
 
 	w.ShowAndRun()
@@ -154,8 +164,8 @@ func (m transparentFyneTheme) Size(name fyne.ThemeSizeName) float32 {
 }
 
 func drawRectangle(a *args) image.Image {
-	dc := gg.NewContext(a.ScreenWidth, a.ScreenHeight)
-	dc.DrawRectangle(a.X, a.Y, a.Width, a.Height)
+	dc := gg.NewContext(int(a.Width), int(a.Height))
+	dc.DrawRectangle(0, 0, a.Width, a.Height)
 	dc.SetColor(a.Colour)
 	dc.SetLineWidth(a.LineWidth)
 	dc.Stroke()
