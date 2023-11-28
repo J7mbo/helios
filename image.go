@@ -14,11 +14,16 @@ var ImageUnknownError = errors.New("unknown error")
 
 type Image struct {
 	img                 i.Image
+	path                string
 	confidenceThreshold float64
 }
 
 func (i *Image) GetImage() i.Image {
 	return i.img
+}
+
+func (i *Image) GetPath() string {
+	return i.path
 }
 
 func NewImage(path string, confidenceThreshold float64) (*Image, error) {
@@ -41,6 +46,7 @@ func NewImage(path string, confidenceThreshold float64) (*Image, error) {
 
 	return &Image{
 		img:                 image,
+		path:                path,
 		confidenceThreshold: confidenceThreshold,
 	}, nil
 }

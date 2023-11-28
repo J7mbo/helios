@@ -1,10 +1,10 @@
 package helios
 
 import (
-	"bytes"
+	"fmt"
 	"github.com/go-vgo/robotgo"
-	"gocv.io/x/gocv"
-	"image/png"
+	"github.com/vcaesar/gcv"
+	"os"
 	"time"
 )
 
@@ -18,46 +18,45 @@ func NewFinder(screen *Screen, pollInterval *PollInterval) *Finder {
 }
 
 func (f *Finder) Find(i *Image, r *Region) *Match {
-	buf := new(bytes.Buffer)
-	_ = png.Encode(buf, i.img)
-	bts := buf.Bytes()
+	// Currently only works for the main monitor.
+	backgroundImg := robotgo.CaptureImg()
+	templateImagePath := "./template.png"
 
-	screen := robotgo.CaptureScreen(int(r.topLeft.x), int(r.topLeft.y), r.width, r.height)
-	scaleSize := robotgo.ScaleF() // On a low res screen, this is 1, but on MBPs with retina displays, it's 2
-	backgroundImg := robotgo.ToBitmapBytes(screen)
+	// Because of bug: https://github.com/vcaesar/gcv/issues/3, we have to save the screenshot first
+	// and then use it.
+	robotgo.SavePng(backgroundImg, templateImagePath)
 
-	img, err := gocv.IMDecode(backgroundImg, gocv.IMReadAnyColor)
+	templateImg, _, err := robotgo.DecodeImg(templateImagePath)
 	if err != nil {
-		panic(err)
+		// @todo return error too?
+		fmt.Println(err)
+		return nil
 	}
 
-	template, err := gocv.IMDecode(bts, gocv.IMReadAnyColor)
-	if err != nil {
-		panic(err)
+	if err := os.Remove(templateImagePath); err != nil {
+		fmt.Println(err)
+		return nil
 	}
 
-	matResult := gocv.NewMat()
-	mask := gocv.NewMat()
+	subImg, _, err := robotgo.DecodeImg(i.GetPath())
+	if err != nil {
+		return nil
+	}
 
-	defer func() {
-		_ = template.Close()
-		_ = img.Close()
-		_ = matResult.Close()
-		_ = mask.Close()
-	}()
-
-	gocv.MatchTemplate(img, template, &matResult, gocv.TmCcoeffNormed, mask)
-
-	_, maxConfidence, _, maxLoc := gocv.MinMaxLoc(matResult)
+	// This just calls OpenCV MinMaxLoc()
+	// These two give different results, we need both....
+	_, maxConfidence, _, maxLoc := gcv.FindImg(subImg, templateImg)
 
 	if maxConfidence < float32(i.confidenceThreshold) {
 		return nil
 	}
 
+	scaleSize := robotgo.ScaleF()
+
 	region := &Region{
 		topLeft: &Point{
-			x: float64((maxLoc.X / int(scaleSize)) + int(r.topLeft.x)),
-			y: float64((maxLoc.Y / int(scaleSize)) + int(r.topLeft.y)),
+			x: float64(maxLoc.X) / scaleSize,
+			y: float64(maxLoc.Y) / scaleSize,
 		},
 		width:  i.img.Bounds().Size().X / int(scaleSize),
 		height: i.img.Bounds().Size().Y / int(scaleSize),
@@ -68,66 +67,54 @@ func (f *Finder) Find(i *Image, r *Region) *Match {
 }
 
 func (f *Finder) FindAll(i *Image, r *Region) []*Match {
-	buf := new(bytes.Buffer)
-	_ = png.Encode(buf, i.img)
-	bts := buf.Bytes()
+	// Currently only works for the main monitor.
+	backgroundImg := robotgo.CaptureImg()
 
-	screen := robotgo.CaptureScreen(int(r.topLeft.x), int(r.topLeft.y), r.width, r.height)
-	scaleSize := robotgo.ScaleF() // On a low res screen, this is 1, but on MBPs with retina displays, it's 2
-	backgroundImg := robotgo.ToBitmapBytes(screen)
+	templateImagePath := "./template.png"
 
-	img, err := gocv.IMDecode(backgroundImg, gocv.IMReadAnyColor)
+	// Because of bug: https://github.com/vcaesar/gcv/issues/3, we have to save the screenshot first
+	// and then use it.
+	robotgo.SavePng(backgroundImg, templateImagePath)
+
+	templateImg, _, err := robotgo.DecodeImg(templateImagePath)
 	if err != nil {
-		panic(err)
+		// @todo return error too?
+		fmt.Println(err)
+		return nil
 	}
 
-	template, err := gocv.IMDecode(bts, gocv.IMReadAnyColor)
-	if err != nil {
-		panic(err)
+	if err := os.Remove(templateImagePath); err != nil {
+		fmt.Println(err)
+		return nil
 	}
 
-	matResult := gocv.NewMat()
-	mask := gocv.NewMat()
+	subImg, _, err := robotgo.DecodeImg(i.GetPath())
+	if err != nil {
+		return nil
+	}
 
-	defer func() {
-		_ = template.Close()
-		_ = img.Close()
-		_ = matResult.Close()
-		_ = mask.Close()
-	}()
-
-	gocv.MatchTemplate(img, template, &matResult, gocv.TmCcoeffNormed, mask)
+	results := gcv.FindAllImg(subImg, templateImg)
+	scaleSize := robotgo.ScaleF()
 
 	var matches []*Match
-	for y := 0; y < matResult.Rows(); y++ {
-	Loop:
-		for x := 0; x < matResult.Cols(); x++ {
-			if matResult.GetFloatAt(y, x) >= float32(i.confidenceThreshold) {
-				region := &Region{
-					topLeft: &Point{
-						x: float64((x / int(scaleSize)) + int(r.topLeft.x)),
-						y: float64((y / int(scaleSize)) + int(r.topLeft.y)),
-					},
-					width:  i.img.Bounds().Size().X / int(scaleSize),
-					height: i.img.Bounds().Size().Y / int(scaleSize),
-					screen: f.screen,
-				}
 
-				// Make sure we haven't already put something + / - 5px in results already.
-				// Ignore shifts in > / < 5px from each found match, otherwise we'll have many duplicates.
-				for _, m := range matches {
-					if inBetween(region.topLeft.x, m.topLeft.x-5, m.topLeft.x+5) &&
-						inBetween(region.topLeft.y, m.topLeft.y-5, m.topLeft.y+5) {
-						continue Loop
-					}
-				}
-
-				matches = append(
-					matches,
-					NewMatch(i, matResult.GetFloatAt(y, x), f.screen, f.screen.highlighter, region),
-				)
-			}
+	for _, result := range results {
+		maxConfidence := float32(result.MaxVal[0])
+		if result.MaxVal[0] < maxConfidence {
+			continue
 		}
+
+		region := &Region{
+			topLeft: &Point{
+				x: float64(result.TopLeft.X) / scaleSize,
+				y: float64(result.TopLeft.Y) / scaleSize,
+			},
+			width:  i.img.Bounds().Size().X / int(scaleSize),
+			height: i.img.Bounds().Size().Y / int(scaleSize),
+			screen: f.screen,
+		}
+
+		matches = append(matches, NewMatch(i, maxConfidence, f.screen, f.screen.highlighter, region))
 	}
 
 	return matches
