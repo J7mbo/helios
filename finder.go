@@ -2,10 +2,11 @@ package helios
 
 import (
 	"fmt"
-	"github.com/go-vgo/robotgo"
-	"github.com/vcaesar/gcv"
 	"os"
 	"time"
+
+	"github.com/go-vgo/robotgo"
+	"github.com/vcaesar/gcv"
 )
 
 type Finder struct {
@@ -19,7 +20,11 @@ func NewFinder(screen *Screen, pollInterval *PollInterval) *Finder {
 
 func (f *Finder) Find(i *Image, r *Region) *Match {
 	// Currently only works for the main monitor.
-	backgroundImg := robotgo.CaptureImg()
+	backgroundImg, err := robotgo.CaptureImg()
+	if err != nil {
+		fmt.Println(err)
+		return nil
+	}
 	templateImagePath := "./template.png"
 
 	// Because of bug: https://github.com/vcaesar/gcv/issues/3, we have to save the screenshot first
@@ -68,7 +73,11 @@ func (f *Finder) Find(i *Image, r *Region) *Match {
 
 func (f *Finder) FindAll(i *Image, r *Region) []*Match {
 	// Currently only works for the main monitor.
-	backgroundImg := robotgo.CaptureImg()
+	backgroundImg, err := robotgo.CaptureImg()
+	if err != nil {
+		fmt.Println(err)
+		return nil
+	}
 
 	templateImagePath := "./template.png"
 
