@@ -48,7 +48,12 @@ brew install opencv
 Docs
 ---
 
-TBD...
+**Those using a mac with a retina display**
+
+When you take a screenshot of something you want to search for on MacOS, like the gopher icon, (use command, control, 
+shift, 4), you need to adjust the image size (if you're using a retina display). To do this, open the image in preview, 
+go to Tools > Adjust Size and then choose 200 per cent for the width and height. Then save. Your image should now be 
+findable.
 
 
 Upcoming work
@@ -58,7 +63,7 @@ Upcoming work
 - [x] Abstraction for `finder`
 - [x] Works with any resolution
 - [x] Wait X seconds for an image to appear
-- [ ] Offsets for regions 
+- [x] Offsets for regions 
 - [ ] Stable supported api
 - [ ] Support and releases for Windows, Linux (MacOS already supported)
 - [ ] Moving highlight box during highlighting

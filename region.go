@@ -32,6 +32,21 @@ func NewRegion(topLeft *Point, width, height int, screen *Screen, finder *Finder
 	return &Region{topLeft, width, height, screen, finder}
 }
 
+func (r *Region) Offset(x, y, width, height int) *Region {
+	newTopLeft := NewPoint(
+		r.topLeft.x+float64(x),
+		r.topLeft.y+float64(y),
+	)
+
+	return NewRegion(
+		newTopLeft,
+		width,
+		height,
+		r.screen,
+		r.finder,
+	)
+}
+
 func (r *Region) GetTopLeft() *Point {
 	return r.topLeft
 }
