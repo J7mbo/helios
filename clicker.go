@@ -1,10 +1,11 @@
 package helios
 
 import (
-	"github.com/go-vgo/robotgo"
 	"math"
 	"math/rand"
 	"time"
+
+	"github.com/go-vgo/robotgo"
 )
 
 type Clicker struct {
@@ -18,6 +19,10 @@ func (c *Clicker) Click(match *Match) {
 	c.moveMouseRandomlyWithinBox(match.topLeft.x, match.topLeft.y, float64(match.width), float64(match.height))
 	c.sleepRandomly(0.2, 0.5)
 	c.performRandomisedClick()
+}
+
+func (c *Clicker) MoveMouseInRegion(region *Region) {
+	c.moveMouseRandomlyWithinBox(region.topLeft.x, region.topLeft.y, float64(region.width), float64(region.height))
 }
 
 func (c *Clicker) performRandomisedClick() {

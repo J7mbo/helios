@@ -50,3 +50,9 @@ func (m *Match) Click() *Match {
 
 	return m
 }
+
+func (m *Match) MoveMouse() *Match {
+	m.clicker.MoveMouseInRegion(&m.Region)
+
+	return m
+}
