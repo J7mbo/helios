@@ -47,6 +47,10 @@ func (r *Region) Offset(x, y, width, height int) *Region {
 	)
 }
 
+func (r *Region) Click() {
+	NewMatch(nil, 0, r.screen, r.screen.highlighter, r).Click()
+}
+
 func (r *Region) GetTopLeft() *Point {
 	return r.topLeft
 }
