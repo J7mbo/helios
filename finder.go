@@ -20,7 +20,12 @@ func NewFinder(screen *Screen, pollInterval *PollInterval) *Finder {
 
 func (f *Finder) Find(i *Image, r *Region) *Match {
 	// Currently only works for the main monitor.
-	backgroundImg, err := robotgo.CaptureImg()
+	backgroundImg, err := robotgo.CaptureImg(
+		int(r.GetTopLeft().GetX()),
+		int(r.GetTopLeft().GetY()),
+		r.GetWidth(),
+		r.GetHeight(),
+	)
 	if err != nil {
 		fmt.Println(err)
 		return nil
@@ -60,8 +65,8 @@ func (f *Finder) Find(i *Image, r *Region) *Match {
 
 	region := &Region{
 		topLeft: &Point{
-			x: float64(maxLoc.X) / scaleSize,
-			y: float64(maxLoc.Y) / scaleSize,
+			x: r.GetTopLeft().GetX() + float64(maxLoc.X)/scaleSize,
+			y: r.GetTopLeft().GetY() + float64(maxLoc.Y)/scaleSize,
 		},
 		width:  i.img.Bounds().Size().X / int(scaleSize),
 		height: i.img.Bounds().Size().Y / int(scaleSize),
@@ -73,11 +78,12 @@ func (f *Finder) Find(i *Image, r *Region) *Match {
 
 func (f *Finder) FindAll(i *Image, r *Region) []*Match {
 	// Currently only works for the main monitor.
-	backgroundImg, err := robotgo.CaptureImg()
-	if err != nil {
-		fmt.Println(err)
-		return nil
-	}
+	backgroundImg, err := robotgo.CaptureImg(
+		int(r.GetTopLeft().GetX()),
+		int(r.GetTopLeft().GetY()),
+		r.GetWidth(),
+		r.GetHeight(),
+	)
 
 	templateImagePath := "./template.png"
 
@@ -115,8 +121,8 @@ func (f *Finder) FindAll(i *Image, r *Region) []*Match {
 
 		region := &Region{
 			topLeft: &Point{
-				x: float64(result.TopLeft.X) / scaleSize,
-				y: float64(result.TopLeft.Y) / scaleSize,
+				x: r.GetTopLeft().GetX() + float64(result.TopLeft.X)/scaleSize,
+				y: r.GetTopLeft().GetY() + float64(result.TopLeft.Y)/scaleSize,
 			},
 			width:  i.img.Bounds().Size().X / int(scaleSize),
 			height: i.img.Bounds().Size().Y / int(scaleSize),
